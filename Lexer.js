@@ -4,7 +4,11 @@
 var INTEGER = 'INTEGER';
 var PLUS = 'PLUS';
 var MINUS = 'MINUS';
+var DIV = 'DIV';
+var MULT = 'MULT';
 var EOF = 'EOF';
+var RPAREN = ')';
+var LPAREN = '(';
 function isSpace(ch) {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
         return true;
@@ -27,20 +31,19 @@ var Token = (function () {
     };
     return Token;
 }());
-var Interpreter = (function () {
-    function Interpreter(text) {
+var Lexer = (function () {
+    function Lexer(text) {
         // client string input, e.g. "3 + 5", "12 - 5", etc
         this.text = text;
         // self.pos is an index into self.text
         this.position = 0;
         // current token instance
-        this.current_token = null;
         this.current_char = this.text[this.position];
     }
-    Interpreter.prototype.error = function () {
-        throw Error('Error parsing input');
+    Lexer.prototype.error = function () {
+        throw Error('Invalid Character');
     };
-    Interpreter.prototype.advance = function () {
+    Lexer.prototype.advance = function () {
         //"""Advance the 'pos' pointer and set the 'current_char' variable."""
         this.position += 1;
         if (this.position > (this.text).length - 1) {
@@ -50,11 +53,11 @@ var Interpreter = (function () {
             this.current_char = this.text[this.position];
         }
     };
-    Interpreter.prototype.skip_whitespace = function () {
+    Lexer.prototype.skip_whitespace = function () {
         while (this.current_char != null && isSpace(this.current_char))
             this.advance();
     };
-    Interpreter.prototype.integer = function () {
+    Lexer.prototype.integer = function () {
         ///"""Return a (multidigit) integer consumed from the input."""
         var result = '';
         while (this.current_char != null && isNumeric(this.current_char)) {
@@ -67,7 +70,7 @@ var Interpreter = (function () {
     //This method is responsible for breaking a sentence
     //apart into tokens.
     //"""
-    Interpreter.prototype.get_next_token = function () {
+    Lexer.prototype.get_next_token = function () {
         while (this.current_char != null) {
             if (isSpace(this.current_char)) {
                 this.skip_whitespace();
@@ -83,9 +86,36 @@ var Interpreter = (function () {
                 this.advance();
                 return new Token(MINUS, '-');
             }
+            if (this.current_char == '*') {
+                this.advance();
+                return new Token(MULT, '*');
+            }
+            if (this.current_char == '/') {
+                this.advance();
+                return new Token(DIV, '/');
+            }
+            if (this.current_char == '(') {
+                this.advance();
+                return new Token(LPAREN, '(');
+            }
+            if (this.current_char == ')') {
+                this.advance();
+                return new Token(RPAREN, ')');
+            }
             this.error();
         }
         return new Token(EOF, null);
+    };
+    return Lexer;
+}());
+var Interpreter = (function () {
+    function Interpreter(lexer) {
+        this.lexer = lexer;
+        this.current_token = this.lexer.get_next_token();
+        // current token instance
+    }
+    Interpreter.prototype.error = function () {
+        throw Error('Invalid Syntax');
     };
     Interpreter.prototype.eat = function (token_type) {
         //# compare the current token type with the passed token
@@ -93,53 +123,63 @@ var Interpreter = (function () {
         //# and assign the next token to the self.current_token,
         //# otherwise raise an exception.
         if (this.current_token.type == token_type) {
-            this.current_token = this.get_next_token();
+            this.current_token = this.lexer.get_next_token();
         }
         else {
             this.error();
         }
     };
+    Interpreter.prototype.factor = function () {
+        var token = this.current_token;
+        if (token.type == INTEGER) {
+            this.eat(INTEGER);
+            return token.value;
+        }
+        else if (token.type == LPAREN) {
+            this.eat(LPAREN);
+            var result = this.expr();
+            this.eat(RPAREN);
+            return result;
+        }
+    };
     Interpreter.prototype.expr = function () {
-        //"""Parser / Interpreter
-        var result = 0;
-        //expr -> INTEGER PLUS INTEGER
-        //expr -> INTEGER MINUS INTEGER
-        //"""
-        //# set current token to the first token taken from the input
-        this.current_token = this.get_next_token();
-        //# we expect the current token to be an integer
-        var left = this.current_token;
-        this.eat(INTEGER);
-        // # we expect the current token to be either a '+' or '-'
-        var op = this.current_token;
-        if (op.type == PLUS) {
-            this.eat(PLUS);
+        var result = this.term();
+        //while the type of token is in the list of valid token types
+        while ([PLUS, MINUS].indexOf(this.current_token.type) > -1) {
+            var token = this.current_token;
+            if (token.type == PLUS) {
+                this.eat(PLUS);
+                result = result + this.term();
+            }
+            else if (token.type == MINUS) {
+                this.eat(MINUS);
+                result = result - this.term();
+            }
         }
-        else {
-            this.eat(MINUS);
-        }
-        // # we expect the current token to be an integer
-        var right = this.current_token;
-        this.eat(INTEGER);
-        //# after the above call the self.current_token is set to
-        //# EOF token
-        //# at this point either the INTEGER PLUS INTEGER or
-        //# the INTEGER MINUS INTEGER sequence of tokens
-        //# has been successfully found and the method can just
-        //# return the result of adding or subtracting two integers,
-        //# thus effectively interpreting client input
-        if (op.type == PLUS) {
-            result = left.value + right.value;
-        }
-        else {
-            result = left.value - right.value;
+        return result;
+    };
+    Interpreter.prototype.term = function () {
+        //"""term : factor ((MUL | DIV) factor)*"""
+        var result = this.factor();
+        while ([MULT, DIV].indexOf(this.current_token.type) > -1) {
+            var token = this.current_token;
+            if (token.type == MULT) {
+                this.eat(MULT);
+                result = result * this.factor();
+            }
+            else if (token.type == DIV) {
+                this.eat(DIV);
+                result = result / this.factor();
+            }
         }
         return result;
     };
     return Interpreter;
 }());
 function main() {
-    var interpreter = new Interpreter("3+ 3");
+    console.log("starting");
+    var lexer = new Lexer("(3+6)*100");
+    var interpreter = new Interpreter(lexer);
     var result = interpreter.expr();
     console.log(result);
     /*      var stdin = process.stdin;
