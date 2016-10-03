@@ -137,14 +137,14 @@ class Lexer {
 
             }
 
-             if (this.current_char == '(') {
+            if (this.current_char == '(') {
 
                 this.advance()
                 return new Token(LPAREN, '(')
 
             }
 
-             if (this.current_char == ')') {
+            if (this.current_char == ')') {
 
                 this.advance()
                 return new Token(RPAREN, ')')
@@ -206,19 +206,19 @@ class Interpreter {
     factor(): number {
         let token = this.current_token
 
-        if(token.type == INTEGER){
+        if (token.type == INTEGER) {
             this.eat(INTEGER)
             return token.value;
         }
-       
 
-        else if(token.type == LPAREN){
+
+        else if (token.type == LPAREN) {
             this.eat(LPAREN)
             let result = this.expr()
             this.eat(RPAREN)
             return result
         }
-           
+
 
     }
 
@@ -230,7 +230,7 @@ class Interpreter {
         //while the type of token is in the list of valid token types
         while ([PLUS, MINUS].indexOf(this.current_token.type) > -1) {
             let token = this.current_token;
-          
+
             if (token.type == PLUS) {
                 this.eat(PLUS)
                 result = result + this.term();
