@@ -2,14 +2,14 @@
 // Token types
 // EOF (end-of-file) token is used to indicate that
 // there is no more input left for lexical analysis
-var INTEGER = 'INTEGER';
-var PLUS = 'PLUS';
-var MINUS = 'MINUS';
-var DIV = 'DIV';
-var MULT = 'MULT';
-var EOF = 'EOF';
-var RPAREN = ')';
-var LPAREN = '(';
+export var INTEGER = 'INTEGER';
+export var PLUS = 'PLUS';
+export var MINUS = 'MINUS';
+export var DIV = 'DIV';
+export var MULT = 'MULT';
+export var EOF = 'EOF';
+export var RPAREN = ')';
+export var LPAREN = '(';
 
 function isSpace(ch: any): boolean {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
@@ -25,7 +25,7 @@ function isNumeric(obj: any) {
 }
 
 
-class Token {
+export class Token {
     type: string;
     value: any;
     constructor(type: string, value: any) {
@@ -40,7 +40,7 @@ class Token {
     }
 }
 
-class Lexer {
+export class Lexer {
     text: string;
     position: number;
     current_char: string;
@@ -265,33 +265,3 @@ class Interpreter {
     }
 }
 
-function main() {
-    console.log("starting");
-    var lexer = new Lexer("(3+6)*100");
-    var interpreter = new Interpreter(lexer);
-    var result = interpreter.expr();
-    console.log(result);
-
-    /*      var stdin = process.stdin;
-  
-  stdin.addListener("data", function(d) {
-      try{
-      // note:  d is an object, and when converted to a string it will
-      // end with a linefeed.  so we (rather crudely) account for that  
-      // with toString() and then trim() 
-      console.log("you entered: [" + 
-          d.toString().trim() + "]");
-  
-           var interpreter = new Interpreter(d.toString());
-          var result = interpreter.expr();
-          console.log(result);
-      }
-      catch(ex){
-           throw new Error(EOF);
-      }
-  
-    });
-    */
-};
-
-main();

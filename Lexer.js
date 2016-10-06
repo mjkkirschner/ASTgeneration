@@ -1,14 +1,15 @@
+"use strict";
 // Token types
 // EOF (end-of-file) token is used to indicate that
 // there is no more input left for lexical analysis
-var INTEGER = 'INTEGER';
-var PLUS = 'PLUS';
-var MINUS = 'MINUS';
-var DIV = 'DIV';
-var MULT = 'MULT';
-var EOF = 'EOF';
-var RPAREN = ')';
-var LPAREN = '(';
+exports.INTEGER = 'INTEGER';
+exports.PLUS = 'PLUS';
+exports.MINUS = 'MINUS';
+exports.DIV = 'DIV';
+exports.MULT = 'MULT';
+exports.EOF = 'EOF';
+exports.RPAREN = ')';
+exports.LPAREN = '(';
 function isSpace(ch) {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
         return true;
@@ -31,6 +32,7 @@ var Token = (function () {
     };
     return Token;
 }());
+exports.Token = Token;
 var Lexer = (function () {
     function Lexer(text) {
         // client string input, e.g. "3 + 5", "12 - 5", etc
@@ -76,38 +78,39 @@ var Lexer = (function () {
                 this.skip_whitespace();
             }
             if (isNumeric(this.current_char)) {
-                return new Token(INTEGER, this.integer());
+                return new Token(exports.INTEGER, this.integer());
             }
             if (this.current_char == '+') {
                 this.advance();
-                return new Token(PLUS, '+');
+                return new Token(exports.PLUS, '+');
             }
             if (this.current_char == '-') {
                 this.advance();
-                return new Token(MINUS, '-');
+                return new Token(exports.MINUS, '-');
             }
             if (this.current_char == '*') {
                 this.advance();
-                return new Token(MULT, '*');
+                return new Token(exports.MULT, '*');
             }
             if (this.current_char == '/') {
                 this.advance();
-                return new Token(DIV, '/');
+                return new Token(exports.DIV, '/');
             }
             if (this.current_char == '(') {
                 this.advance();
-                return new Token(LPAREN, '(');
+                return new Token(exports.LPAREN, '(');
             }
             if (this.current_char == ')') {
                 this.advance();
-                return new Token(RPAREN, ')');
+                return new Token(exports.RPAREN, ')');
             }
             this.error();
         }
-        return new Token(EOF, null);
+        return new Token(exports.EOF, null);
     };
     return Lexer;
 }());
+exports.Lexer = Lexer;
 var Interpreter = (function () {
     function Interpreter(lexer) {
         this.lexer = lexer;
@@ -131,28 +134,28 @@ var Interpreter = (function () {
     };
     Interpreter.prototype.factor = function () {
         var token = this.current_token;
-        if (token.type == INTEGER) {
-            this.eat(INTEGER);
+        if (token.type == exports.INTEGER) {
+            this.eat(exports.INTEGER);
             return token.value;
         }
-        else if (token.type == LPAREN) {
-            this.eat(LPAREN);
+        else if (token.type == exports.LPAREN) {
+            this.eat(exports.LPAREN);
             var result = this.expr();
-            this.eat(RPAREN);
+            this.eat(exports.RPAREN);
             return result;
         }
     };
     Interpreter.prototype.expr = function () {
         var result = this.term();
         //while the type of token is in the list of valid token types
-        while ([PLUS, MINUS].indexOf(this.current_token.type) > -1) {
+        while ([exports.PLUS, exports.MINUS].indexOf(this.current_token.type) > -1) {
             var token = this.current_token;
-            if (token.type == PLUS) {
-                this.eat(PLUS);
+            if (token.type == exports.PLUS) {
+                this.eat(exports.PLUS);
                 result = result + this.term();
             }
-            else if (token.type == MINUS) {
-                this.eat(MINUS);
+            else if (token.type == exports.MINUS) {
+                this.eat(exports.MINUS);
                 result = result - this.term();
             }
         }
@@ -161,14 +164,14 @@ var Interpreter = (function () {
     Interpreter.prototype.term = function () {
         //"""term : factor ((MUL | DIV) factor)*"""
         var result = this.factor();
-        while ([MULT, DIV].indexOf(this.current_token.type) > -1) {
+        while ([exports.MULT, exports.DIV].indexOf(this.current_token.type) > -1) {
             var token = this.current_token;
-            if (token.type == MULT) {
-                this.eat(MULT);
+            if (token.type == exports.MULT) {
+                this.eat(exports.MULT);
                 result = result * this.factor();
             }
-            else if (token.type == DIV) {
-                this.eat(DIV);
+            else if (token.type == exports.DIV) {
+                this.eat(exports.DIV);
                 result = result / this.factor();
             }
         }
@@ -176,33 +179,4 @@ var Interpreter = (function () {
     };
     return Interpreter;
 }());
-function main() {
-    console.log("starting");
-    var lexer = new Lexer("(3+6)*100");
-    var interpreter = new Interpreter(lexer);
-    var result = interpreter.expr();
-    console.log(result);
-    /*      var stdin = process.stdin;
-  
-  stdin.addListener("data", function(d) {
-      try{
-      // note:  d is an object, and when converted to a string it will
-      // end with a linefeed.  so we (rather crudely) account for that
-      // with toString() and then trim()
-      console.log("you entered: [" +
-          d.toString().trim() + "]");
-  
-           var interpreter = new Interpreter(d.toString());
-          var result = interpreter.expr();
-          console.log(result);
-      }
-      catch(ex){
-           throw new Error(EOF);
-      }
-  
-    });
-    */
-}
-;
-main();
 //# sourceMappingURL=Lexer.js.map
