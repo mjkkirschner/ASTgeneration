@@ -23,6 +23,18 @@ export class BinOp extends AST {
     }
 }
 
+export class UnaryOp{
+    token: Lexer.Token;
+    op: Lexer.Token;
+    expr:AST
+    constructor(op: Lexer.Token,expr: AST)
+    {
+        this.expr = expr;
+        this.op = op;
+        this.token = op;
+    }
+}
+
 
 export class Num extends AST {
     
