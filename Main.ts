@@ -1,6 +1,6 @@
 import * as Parser from './Parser';
 import * as Lexer from './Lexer';
-
+import * as Interpreter from './interprerter';
 
 function main() {
     console.log("starting");
@@ -8,7 +8,7 @@ function main() {
     console.log(lexer);
     console.log(Parser);
     var parser = new Parser.parseMachine(lexer);
-    var interpreter = new Lexer.Interpreter(parser);
+    var interpreter = new Interpreter.Interpreter(parser);
     var result = interpreter.interpret();
     console.log(result);
     //var result = interpreter.expr();

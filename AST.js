@@ -22,6 +22,15 @@ var BinOp = (function (_super) {
     return BinOp;
 }(AST));
 exports.BinOp = BinOp;
+var UnaryOp = (function () {
+    function UnaryOp(op, expr) {
+        this.expr = expr;
+        this.op = op;
+        this.token = op;
+    }
+    return UnaryOp;
+}());
+exports.UnaryOp = UnaryOp;
 var Num = (function (_super) {
     __extends(Num, _super);
     function Num(token) {
