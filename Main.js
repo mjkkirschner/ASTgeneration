@@ -7,8 +7,9 @@ function main() {
     console.log(lexer);
     console.log(Parser);
     var parser = new Parser.parseMachine(lexer);
-    var tree = parser.parse();
-    //var interpreter = new Interpreter(lexer);
+    var interpreter = new Lexer.Interpreter(parser);
+    var result = interpreter.interpret();
+    console.log(result);
     //var result = interpreter.expr();
     //console.log(tree);
     /*      var stdin = process.stdin;

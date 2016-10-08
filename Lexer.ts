@@ -1,4 +1,8 @@
 
+import * as AST from './AST';
+import * as Parser from './Parser';
+
+
 // Token types
 // EOF (end-of-file) token is used to indicate that
 // there is no more input left for lexical analysis
@@ -98,170 +102,106 @@ export class Lexer {
 
         while (this.current_char != null) {
 
-
-
             if (isSpace(this.current_char)) {
                 this.skip_whitespace();
             }
-
-
             if (isNumeric(this.current_char)) {
                 return new Token(INTEGER, this.integer())
             }
-
-
             if (this.current_char == '+') {
                 this.advance()
                 return new Token(PLUS, '+')
             }
-
-
             if (this.current_char == '-') {
 
                 this.advance()
                 return new Token(MINUS, '-')
-
             }
-
             if (this.current_char == '*') {
 
                 this.advance()
                 return new Token(MULT, '*')
 
             }
-
             if (this.current_char == '/') {
 
                 this.advance()
                 return new Token(DIV, '/')
-
             }
-
             if (this.current_char == '(') {
-
                 this.advance()
                 return new Token(LPAREN, '(')
 
             }
-
             if (this.current_char == ')') {
 
                 this.advance()
                 return new Token(RPAREN, ')')
-
             }
-
-
-
             this.error();
         }
 
         return new Token(EOF, null)
 
     }
-
-
-
-
-
-
-
 }
 
-class Interpreter {
+class NodeVisitor{
+    constructor(){
 
+    }
+    //TODO implement this without the method lookup...
+    //does javascript do virtual dispatch?
+     visit(node:AST.AST)
+     {
+        var method_name = 'visit_' + node.constructor['name'];
+        console.log(method_name);
+        var visitor = this[method_name].bind(this);
+        return visitor(node);
+     }
+}
+export class Interpreter extends NodeVisitor {
 
     current_token: Token;
-    lexer: Lexer;
+    parser: Parser.parseMachine;
 
-    constructor(lexer: Lexer) {
-        this.lexer = lexer;
-        this.current_token = this.lexer.get_next_token();
-
-        // current token instance
+    constructor(parser: Parser.parseMachine) {
+        super();
+        this.parser = parser;
     }
 
+    //****visitors*****
+     visit_BinOp(node:AST.BinOp)
+     {
+        if (node.op.type == PLUS){
+            return this.visit(node.left) + this.visit(node.right)
+        }
+        else if (node.op.type == MINUS){
+               return this.visit(node.left) - this.visit(node.right)
+        }
+         else if (node.op.type == MULT){
+               return this.visit(node.left) * this.visit(node.right)
+        }
+         else if (node.op.type == DIV){
+               return this.visit(node.left) / this.visit(node.right)
+        }
+     }
+
+    visit_Num(node:AST.Num)
+    {
+        return node.value
+    }
+        
     error() {
         throw Error('Invalid Syntax');
     }
 
-
-
-    eat(token_type: any) {
-        //# compare the current token type with the passed token
-        //# type and if they match then "eat" the current token
-        //# and assign the next token to the self.current_token,
-        //# otherwise raise an exception.
-        if (this.current_token.type == token_type) {
-            this.current_token = this.lexer.get_next_token()
-        }
-
-        else {
-            this.error()
-        }
-
+    interpret(){
+        var tree = this.parser.parse();
+        return this.visit(tree);
     }
+      
 
 
-    factor(): number {
-        let token = this.current_token
-
-        if (token.type == INTEGER) {
-            this.eat(INTEGER)
-            return token.value;
-        }
-
-
-        else if (token.type == LPAREN) {
-            this.eat(LPAREN)
-            let result = this.expr()
-            this.eat(RPAREN)
-            return result
-        }
-
-
-    }
-
-
-    expr(): number {
-
-        let result = this.term();
-
-        //while the type of token is in the list of valid token types
-        while ([PLUS, MINUS].indexOf(this.current_token.type) > -1) {
-            let token = this.current_token;
-
-            if (token.type == PLUS) {
-                this.eat(PLUS)
-                result = result + this.term();
-            }
-            else if (token.type == MINUS) {
-                this.eat(MINUS)
-                result = result - this.term();
-            }
-
-        }
-        return result;
-    }
-
-    term() {
-        //"""term : factor ((MUL | DIV) factor)*"""
-        let result = this.factor();
-
-        while ([MULT, DIV].indexOf(this.current_token.type) > -1) {
-            let token = this.current_token;
-            if (token.type == MULT) {
-                this.eat(MULT)
-                result = result * this.factor();
-
-            }
-
-            else if (token.type == DIV) {
-                this.eat(DIV)
-                result = result / this.factor()
-            }
-        }
-        return result
-    }
 }
 

@@ -1,4 +1,9 @@
 "use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 // Token types
 // EOF (end-of-file) token is used to indicate that
 // there is no more input left for lexical analysis
@@ -111,72 +116,51 @@ var Lexer = (function () {
     return Lexer;
 }());
 exports.Lexer = Lexer;
-var Interpreter = (function () {
-    function Interpreter(lexer) {
-        this.lexer = lexer;
-        this.current_token = this.lexer.get_next_token();
-        // current token instance
+var NodeVisitor = (function () {
+    function NodeVisitor() {
     }
+    //TODO implement this without the method lookup...
+    //does javascript do virtual dispatch?
+    NodeVisitor.prototype.visit = function (node) {
+        var method_name = 'visit_' + node.constructor['name'];
+        console.log(method_name);
+        var visitor = this[method_name].bind(this);
+        return visitor(node);
+    };
+    return NodeVisitor;
+}());
+var Interpreter = (function (_super) {
+    __extends(Interpreter, _super);
+    function Interpreter(parser) {
+        _super.call(this);
+        this.parser = parser;
+    }
+    //****visitors*****
+    Interpreter.prototype.visit_BinOp = function (node) {
+        if (node.op.type == exports.PLUS) {
+            return this.visit(node.left) + this.visit(node.right);
+        }
+        else if (node.op.type == exports.MINUS) {
+            return this.visit(node.left) - this.visit(node.right);
+        }
+        else if (node.op.type == exports.MULT) {
+            return this.visit(node.left) * this.visit(node.right);
+        }
+        else if (node.op.type == exports.DIV) {
+            return this.visit(node.left) / this.visit(node.right);
+        }
+    };
+    Interpreter.prototype.visit_Num = function (node) {
+        return node.value;
+    };
     Interpreter.prototype.error = function () {
         throw Error('Invalid Syntax');
     };
-    Interpreter.prototype.eat = function (token_type) {
-        //# compare the current token type with the passed token
-        //# type and if they match then "eat" the current token
-        //# and assign the next token to the self.current_token,
-        //# otherwise raise an exception.
-        if (this.current_token.type == token_type) {
-            this.current_token = this.lexer.get_next_token();
-        }
-        else {
-            this.error();
-        }
-    };
-    Interpreter.prototype.factor = function () {
-        var token = this.current_token;
-        if (token.type == exports.INTEGER) {
-            this.eat(exports.INTEGER);
-            return token.value;
-        }
-        else if (token.type == exports.LPAREN) {
-            this.eat(exports.LPAREN);
-            var result = this.expr();
-            this.eat(exports.RPAREN);
-            return result;
-        }
-    };
-    Interpreter.prototype.expr = function () {
-        var result = this.term();
-        //while the type of token is in the list of valid token types
-        while ([exports.PLUS, exports.MINUS].indexOf(this.current_token.type) > -1) {
-            var token = this.current_token;
-            if (token.type == exports.PLUS) {
-                this.eat(exports.PLUS);
-                result = result + this.term();
-            }
-            else if (token.type == exports.MINUS) {
-                this.eat(exports.MINUS);
-                result = result - this.term();
-            }
-        }
-        return result;
-    };
-    Interpreter.prototype.term = function () {
-        //"""term : factor ((MUL | DIV) factor)*"""
-        var result = this.factor();
-        while ([exports.MULT, exports.DIV].indexOf(this.current_token.type) > -1) {
-            var token = this.current_token;
-            if (token.type == exports.MULT) {
-                this.eat(exports.MULT);
-                result = result * this.factor();
-            }
-            else if (token.type == exports.DIV) {
-                this.eat(exports.DIV);
-                result = result / this.factor();
-            }
-        }
-        return result;
+    Interpreter.prototype.interpret = function () {
+        var tree = this.parser.parse();
+        return this.visit(tree);
     };
     return Interpreter;
-}());
+}(NodeVisitor));
+exports.Interpreter = Interpreter;
 //# sourceMappingURL=Lexer.js.map
