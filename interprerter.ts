@@ -44,6 +44,15 @@ export class Interpreter extends NodeVisitor {
         }
      }
 
+     visit_UnaryOp(node:AST.UnaryOp){
+         if (node.op.type == Lexer.PLUS){
+             return + this.visit(node.expr);
+         }
+         else if(node.op.type == Lexer.MINUS){
+             return - this.visit(node.expr);
+         }
+     }
+
     visit_Num(node:AST.Num)
     {
         return node.value

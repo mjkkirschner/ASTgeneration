@@ -4,7 +4,7 @@ var Lexer = require('./Lexer');
 var Interpreter = require('./interprerter');
 function main() {
     console.log("starting");
-    var lexer = new Lexer.Lexer("(3+6)*100");
+    var lexer = new Lexer.Lexer("-(-(3+6)*100)");
     console.log(lexer);
     console.log(Parser);
     var parser = new Parser.parseMachine(lexer);

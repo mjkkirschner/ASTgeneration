@@ -39,6 +39,14 @@ var Interpreter = (function (_super) {
             return this.visit(node.left) / this.visit(node.right);
         }
     };
+    Interpreter.prototype.visit_UnaryOp = function (node) {
+        if (node.op.type == Lexer.PLUS) {
+            return +this.visit(node.expr);
+        }
+        else if (node.op.type == Lexer.MINUS) {
+            return -this.visit(node.expr);
+        }
+    };
     Interpreter.prototype.visit_Num = function (node) {
         return node.value;
     };

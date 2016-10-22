@@ -44,7 +44,19 @@ export class parseMachine {
     factor(): AST.AST {
         let token = this.current_token
 
-        if (token.type == Lexer.INTEGER) {
+
+        if (token.type == Lexer.PLUS) {
+            this.eat(Lexer.PLUS)
+            let node = this.factor();
+            return new AST.UnaryOp(token,node);
+        }
+        else if (token.type == Lexer.MINUS) {
+            this.eat(Lexer.MINUS)
+            let node = this.factor();
+            return new AST.UnaryOp(token,node);
+        }
+
+        else if (token.type == Lexer.INTEGER) {
             this.eat(Lexer.INTEGER)
             return new AST.Num(token);
         }

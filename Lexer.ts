@@ -14,13 +14,50 @@ export var MULT = 'MULT';
 export var EOF = 'EOF';
 export var RPAREN = ')';
 export var LPAREN = '(';
+export var ID = 'ID';
+export var ASSIGN = '=';
+export var SEMI = ';';
+
+//not going to use these pascal tokens
+export var RESERVED_KEYWORDS = {
+    'BEGIN': new Token('BEGIN', 'BEGIN'),
+    'END': new Token('END', 'END'),
+}
+
+function peek():string{
+ let peek_pos = this.pos + 1
+    if (peek_pos > (this.text.length - 1))
+        return null;
+    else{
+        return this.text[peek_pos]
+    }
+}
+   
+function id():Token{
+
+
+    let result = ''
+    while(this.current_char != null && isAlNum(this.current_char)){
+
+    
+        result += this.current_char;
+        this.advance();
+    }
+    
+    let token = new Token(ID, result);
+    if(result in RESERVED_KEYWORDS){
+        
+        token = RESERVED_KEYWORDS[result];
+    }
+ 
+    return token;
+}
 
 function isSpace(ch: any): boolean {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
         return true;
     }
     return false;
-
 }
 
 
@@ -28,6 +65,13 @@ function isNumeric(obj: any) {
     return !isNaN(obj - parseFloat(obj));
 }
 
+function isAlNum(obj: any):boolean {
+    return /^[a-z0-9]+$/i.test(obj);
+}
+
+function isAlpha(str) {
+  return /^[a-zA-Z]+$/.test(str);
+}
 
 export class Token {
     type: string;
@@ -101,6 +145,22 @@ export class Lexer {
     get_next_token() {
 
         while (this.current_char != null) {
+
+
+            if(isAlpha(this.current_char))
+            {
+                return id();
+            }
+            if(this.current_char == "=")
+            {
+               this.advance();
+               return new Token(ASSIGN,'=');
+            }
+             if(this.current_char == ";")
+            {
+               this.advance();
+               return new Token(SEMI,';');
+            }
 
             if (isSpace(this.current_char)) {
                 this.skip_whitespace();
