@@ -10,6 +10,13 @@ exports.MULT = 'MULT';
 exports.EOF = 'EOF';
 exports.RPAREN = ')';
 exports.LPAREN = '(';
+exports.ID = 'ID';
+exports.ASSIGN = '=';
+exports.SEMI = ';';
+//not going to use these pascal tokens
+//let RESERVED_KEYWORDS: {BEGIN:Token,END:Token};
+//RESERVED_KEYWORDS.BEGIN = new Token('BEGIN', 'BEGIN')
+//RESERVED_KEYWORDS.END = new Token('END', 'END')
 function isSpace(ch) {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
         return true;
@@ -18,6 +25,12 @@ function isSpace(ch) {
 }
 function isNumeric(obj) {
     return !isNaN(obj - parseFloat(obj));
+}
+function isAlNum(obj) {
+    return /^[a-z0-9]+$/i.test(obj);
+}
+function isAlpha(str) {
+    return /^[a-zA-Z]+$/.test(str);
 }
 var Token = (function () {
     function Token(type, value) {
@@ -41,7 +54,28 @@ var Lexer = (function () {
         this.position = 0;
         // current token instance
         this.current_char = this.text[this.position];
+        this.RESERVED_KEYWORDS = {};
     }
+    Lexer.prototype.peek = function () {
+        var peek_pos = this.position + 1;
+        if (peek_pos > (this.text.length - 1))
+            return null;
+        else {
+            return this.text[peek_pos];
+        }
+    };
+    Lexer.prototype.id = function () {
+        var result = '';
+        while (this.current_char != null && isAlNum(this.current_char)) {
+            result += this.current_char;
+            this.advance();
+        }
+        var token = new Token(exports.ID, result);
+        if (result in this.RESERVED_KEYWORDS) {
+            token = this.RESERVED_KEYWORDS[result];
+        }
+        return token;
+    };
     Lexer.prototype.error = function () {
         throw Error('Invalid Character');
     };
@@ -74,8 +108,20 @@ var Lexer = (function () {
     //"""
     Lexer.prototype.get_next_token = function () {
         while (this.current_char != null) {
+            if (isAlpha(this.current_char)) {
+                return this.id();
+            }
+            if (this.current_char == "=") {
+                this.advance();
+                return new Token(exports.ASSIGN, '=');
+            }
+            if (this.current_char == ";") {
+                this.advance();
+                return new Token(exports.SEMI, ';');
+            }
             if (isSpace(this.current_char)) {
                 this.skip_whitespace();
+                continue;
             }
             if (isNumeric(this.current_char)) {
                 return new Token(exports.INTEGER, this.integer());

@@ -64,6 +64,7 @@ export class Interpreter extends NodeVisitor {
 
     interpret(){
         var tree = this.parser.parse();
+        console.log(tree);
         return this.visit(tree);
     }
       

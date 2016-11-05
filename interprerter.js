@@ -55,6 +55,7 @@ var Interpreter = (function (_super) {
     };
     Interpreter.prototype.interpret = function () {
         var tree = this.parser.parse();
+        console.log(tree);
         return this.visit(tree);
     };
     return Interpreter;

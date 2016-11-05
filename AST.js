@@ -10,6 +10,44 @@ var AST = (function () {
     return AST;
 }());
 exports.AST = AST;
+var Compound = (function (_super) {
+    __extends(Compound, _super);
+    function Compound() {
+        _super.call(this);
+        this.children = [];
+    }
+    return Compound;
+}(AST));
+exports.Compound = Compound;
+var Assign = (function (_super) {
+    __extends(Assign, _super);
+    function Assign(left, op, right) {
+        _super.call(this);
+        this.left = left;
+        this.token = op;
+        this.op = op;
+        this.right = right;
+    }
+    return Assign;
+}(AST));
+exports.Assign = Assign;
+var Var = (function (_super) {
+    __extends(Var, _super);
+    function Var(token) {
+        _super.call(this);
+        this.token = token;
+        this.value = token.value;
+    }
+    return Var;
+}(AST));
+exports.Var = Var;
+var NoOp = (function (_super) {
+    __extends(NoOp, _super);
+    function NoOp() {
+        _super.apply(this, arguments);
+    }
+    return NoOp;
+}(AST));
 var BinOp = (function (_super) {
     __extends(BinOp, _super);
     function BinOp(left, op, right) {

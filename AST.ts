@@ -7,7 +7,49 @@ export class AST {
     }
 }
 
+export class Compound extends AST{
+   
+   children :AST[];
 
+   constructor()
+   {
+    super();
+    this.children = [];
+   }
+}
+
+export class Assign extends AST
+{
+    left:AST;
+    right:AST;
+    op:Lexer.Token;
+    token:Lexer.Token;
+
+    constructor(left, op, right)
+    {   super();
+        this.left = left
+        this.token = op;
+        this.op = op;
+        this.right = right
+    }
+}
+
+export class Var extends AST
+{
+    token:Lexer.Token;
+    value:any;
+constructor(token:Lexer.Token){
+        super();
+        this.token = token;
+        this.value = token.value;
+    }
+}
+
+class NoOp extends AST
+{
+
+}
+    
 export class BinOp extends AST {
     left: AST;
     right: AST;

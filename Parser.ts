@@ -15,7 +15,11 @@ export class parseMachine {
     }
 
     parse():AST.AST{
-        return this.expr()
+    let node = this.compound_statement();
+    if (this.current_token.type != Lexer.EOF){
+        this.error();
+    }
+        return node;
     }
         
 
@@ -26,6 +30,7 @@ export class parseMachine {
 
 
     eat(token_type: any) {
+        console.log("eating a token"+token_type);
         //# compare the current token type with the passed token
         //# type and if they match then "eat" the current token
         //# and assign the next token to the self.current_token,
@@ -68,6 +73,12 @@ export class parseMachine {
             this.eat(Lexer.RPAREN)
             return node;
         }
+        else
+        {
+        let node = this.variable();
+        return node;
+        }
+
 
 
     }
@@ -116,4 +127,75 @@ export class parseMachine {
         }
         return BinNode || node;
     };
+
+    compound_statement(): AST.AST 
+    {
+        let nodes = this.statement_list();
+
+        let root = new AST.Compound();
+        for (let node of nodes) {
+            root.children.push(node)
+        }
+        return root;
+    }
+   
+    
+    statement_list(): AST.AST[] {
+        let node = this.statement();
+        let results = [node];
+
+        while (this.current_token.type == Lexer.SEMI)
+         {
+            this.eat(Lexer.SEMI);
+            results.push(this.statement())
+        }
+
+        if (this.current_token.type == Lexer.ID) {
+            this.error();
+        }
+
+        return results;
+    }
+
+  statement():AST.AST
+    {
+        let node:AST.AST;
+    if (this.current_token.type == Lexer.ID)
+    {
+          node = this.assignment_statement();
+    }
+    else{
+        node = this.compound_statement();
+    }
+      
+   // else:
+    //    node = self.empty()
+    return node
+}
+ assignment_statement(){
+
+    
+    let left = this.variable();
+    let token = this.current_token;
+    if(token.type == Lexer.ASSIGN){
+        this.eat(Lexer.ASSIGN);
+    }
+    else{
+        this.eat(Lexer.SEMI);
+    }
+    let right = this.expr();
+    let node = new AST.Assign(left, token, right);
+    return node;
+ }
+ variable(){
+    
+    let node = new AST.Var(this.current_token);
+    this.eat(Lexer.ID);
+    return node;
+ }
+// empty(){
+ //  
+ //   return new AST.NoOp()
+// }
+
 };

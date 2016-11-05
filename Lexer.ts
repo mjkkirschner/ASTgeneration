@@ -19,39 +19,12 @@ export var ASSIGN = '=';
 export var SEMI = ';';
 
 //not going to use these pascal tokens
-export var RESERVED_KEYWORDS = {
-    'BEGIN': new Token('BEGIN', 'BEGIN'),
-    'END': new Token('END', 'END'),
-}
-
-function peek():string{
- let peek_pos = this.pos + 1
-    if (peek_pos > (this.text.length - 1))
-        return null;
-    else{
-        return this.text[peek_pos]
-    }
-}
-   
-function id():Token{
+//let RESERVED_KEYWORDS: {BEGIN:Token,END:Token};
+//RESERVED_KEYWORDS.BEGIN = new Token('BEGIN', 'BEGIN')
+//RESERVED_KEYWORDS.END = new Token('END', 'END')
 
 
-    let result = ''
-    while(this.current_char != null && isAlNum(this.current_char)){
 
-    
-        result += this.current_char;
-        this.advance();
-    }
-    
-    let token = new Token(ID, result);
-    if(result in RESERVED_KEYWORDS){
-        
-        token = RESERVED_KEYWORDS[result];
-    }
- 
-    return token;
-}
 
 function isSpace(ch: any): boolean {
     if ((ch == ' ') || (ch == '\t') || (ch == '\n')) {
@@ -92,6 +65,9 @@ export class Lexer {
     text: string;
     position: number;
     current_char: string;
+    RESERVED_KEYWORDS: {};
+
+
 
     constructor(text: string) {
         // client string input, e.g. "3 + 5", "12 - 5", etc
@@ -100,7 +76,36 @@ export class Lexer {
         this.position = 0;
         // current token instance
         this.current_char = this.text[this.position];
+        this.RESERVED_KEYWORDS = {};
     }
+
+    peek():string{
+    let peek_pos = this.position + 1
+    if (peek_pos > (this.text.length - 1))
+        return null;
+    else{
+        return this.text[peek_pos]
+    }
+}
+   
+    id():Token{
+
+
+    let result = ''
+    while(this.current_char != null && isAlNum(this.current_char)){
+
+        result += this.current_char;
+        this.advance();
+    }
+    
+    let token = new Token(ID, result);
+    if(result in this.RESERVED_KEYWORDS){
+        
+        token = this.RESERVED_KEYWORDS[result];
+    }
+ 
+    return token;
+}
 
     error() {
         throw Error('Invalid Character')
@@ -149,7 +154,7 @@ export class Lexer {
 
             if(isAlpha(this.current_char))
             {
-                return id();
+                return this.id();
             }
             if(this.current_char == "=")
             {
@@ -164,6 +169,7 @@ export class Lexer {
 
             if (isSpace(this.current_char)) {
                 this.skip_whitespace();
+                continue;
             }
             if (isNumeric(this.current_char)) {
                 return new Token(INTEGER, this.integer())

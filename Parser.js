@@ -8,12 +8,17 @@ var parseMachine = (function () {
         // current token instance
     }
     parseMachine.prototype.parse = function () {
-        return this.expr();
+        var node = this.compound_statement();
+        if (this.current_token.type != Lexer.EOF) {
+            this.error();
+        }
+        return node;
     };
     parseMachine.prototype.error = function () {
         throw Error('Invalid Syntax');
     };
     parseMachine.prototype.eat = function (token_type) {
+        console.log("eating a token" + token_type);
         //# compare the current token type with the passed token
         //# type and if they match then "eat" the current token
         //# and assign the next token to the self.current_token,
@@ -45,6 +50,10 @@ var parseMachine = (function () {
             this.eat(Lexer.LPAREN);
             var node = this.expr();
             this.eat(Lexer.RPAREN);
+            return node;
+        }
+        else {
+            var node = this.variable();
             return node;
         }
     };
@@ -82,6 +91,57 @@ var parseMachine = (function () {
         return BinNode || node;
     };
     ;
+    parseMachine.prototype.compound_statement = function () {
+        var nodes = this.statement_list();
+        var root = new AST.Compound();
+        for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+            var node = nodes_1[_i];
+            root.children.push(node);
+        }
+        return root;
+    };
+    parseMachine.prototype.statement_list = function () {
+        var node = this.statement();
+        var results = [node];
+        while (this.current_token.type == Lexer.SEMI) {
+            this.eat(Lexer.SEMI);
+            results.push(this.statement());
+        }
+        if (this.current_token.type == Lexer.ID) {
+            this.error();
+        }
+        return results;
+    };
+    parseMachine.prototype.statement = function () {
+        var node;
+        if (this.current_token.type == Lexer.ID) {
+            node = this.assignment_statement();
+        }
+        else {
+            node = this.compound_statement();
+        }
+        // else:
+        //    node = self.empty()
+        return node;
+    };
+    parseMachine.prototype.assignment_statement = function () {
+        var left = this.variable();
+        var token = this.current_token;
+        if (token.type == Lexer.ASSIGN) {
+            this.eat(Lexer.ASSIGN);
+        }
+        else {
+            this.eat(Lexer.SEMI);
+        }
+        var right = this.expr();
+        var node = new AST.Assign(left, token, right);
+        return node;
+    };
+    parseMachine.prototype.variable = function () {
+        var node = new AST.Var(this.current_token);
+        this.eat(Lexer.ID);
+        return node;
+    };
     return parseMachine;
 }());
 exports.parseMachine = parseMachine;
