@@ -45,7 +45,7 @@ constructor(token:Lexer.Token){
     }
 }
 
-class NoOp extends AST
+export class NoOp extends AST
 {
 
 }

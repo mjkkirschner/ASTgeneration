@@ -164,6 +164,9 @@ export class parseMachine {
     {
           node = this.assignment_statement();
     }
+    else if(this.current_token.type == Lexer.EOF) {
+        node = this.empty();
+    }
     else{
         node = this.compound_statement();
     }
@@ -171,6 +174,10 @@ export class parseMachine {
    // else:
     //    node = self.empty()
     return node
+}
+
+empty():AST.AST{
+    return new AST.NoOp();
 }
  assignment_statement(){
 

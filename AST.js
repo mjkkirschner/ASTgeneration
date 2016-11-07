@@ -48,6 +48,7 @@ var NoOp = (function (_super) {
     }
     return NoOp;
 }(AST));
+exports.NoOp = NoOp;
 var BinOp = (function (_super) {
     __extends(BinOp, _super);
     function BinOp(left, op, right) {

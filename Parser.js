@@ -117,12 +117,18 @@ var parseMachine = (function () {
         if (this.current_token.type == Lexer.ID) {
             node = this.assignment_statement();
         }
+        else if (this.current_token.type == Lexer.EOF) {
+            node = this.empty();
+        }
         else {
             node = this.compound_statement();
         }
         // else:
         //    node = self.empty()
         return node;
+    };
+    parseMachine.prototype.empty = function () {
+        return new AST.NoOp();
     };
     parseMachine.prototype.assignment_statement = function () {
         var left = this.variable();
