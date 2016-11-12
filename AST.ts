@@ -25,7 +25,7 @@ export class Assign extends AST
     op:Lexer.Token;
     token:Lexer.Token;
 
-    constructor(left, op, right)
+    constructor(left:AST, op:Lexer.Token, right:AST)
     {   super();
         this.left = left
         this.token = op;
