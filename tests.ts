@@ -57,6 +57,4 @@ describe('parser', function () {
 
        expect(JSON.stringify(tree)).to.equal(JSON.stringify(tree2));
     });
-
-
 });
