@@ -1,5 +1,10 @@
-/// <amd-dependency path="./node_modules/sigma/build/sigma.min"/>
 /// <amd-dependency path="./node_modules/jquery/dist/jquery.min"/>
+
+//cant really load sigma stuff with AMD since sigma will finish loading after the plugins which require it is already loaded...
+//and they are not set up for AMD... (note only two slashes below)
+// <amd-dependency path="./node_modules/sigma/build/sigma.min"/>
+// <amd-dependency path ="./node_modules/sigma/plugins/sigma.layout.forceAtlas2/worker.js">
+// <amd-dependency path ="./node_modules/sigma/plugins/sigma.layout.forceAtlas2/supervisor.js">
 
 import * as Parser from './Parser';
 import * as Lexer from './Lexer';
@@ -107,6 +112,8 @@ s = new sigma(
   graph: g,
   container: $('#graph-container').get(0)
     });
+    s.startForceAtlas2({worker:false,barnesHutOptimize:false});
+    setTimeout(()=> {s.stopForceAtlas2()},1000);
 }
 );
     //var result = interpreter.interpret();
