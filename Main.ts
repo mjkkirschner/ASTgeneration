@@ -6,6 +6,72 @@ import * as Lexer from './Lexer';
 import * as Interpreter from './interprerter';
 import * as AST from './AST';
 
+
+
+class TreeWalker {
+  OutNodes: any[];
+  OutEdges: any[];
+  tree: AST.AST;
+  constructor(tree: AST.AST) {
+    this.OutNodes = [];
+    this.OutEdges = [];
+    this.tree = tree;
+  }
+
+  public ComputeSigmaNodes(): {nodes:any[],edges:any[]} {
+    let rootNode = {
+          id: this.tree.ID.toString(),
+          label: this.tree.constructor['name'],
+          x: Math.random(),
+          y: Math.random(),
+          size: 6,
+          color: '#666'
+
+        }
+        this.OutNodes.push(rootNode);
+    this.internalvisit(this.tree);
+    return {nodes:this.OutNodes,edges:this.OutEdges};
+  }
+
+  private internalvisit(node: AST.AST) {
+
+    if (node.children) {
+      for (let child of node.children) {
+        let newNode = {
+          id: child.ID.toString(),
+          label: child.constructor['name'],
+          x: Math.random(),
+          y: Math.random(),
+          size: 6,
+          color: '#666'
+
+        }
+        console.log(newNode);
+        this.OutNodes.push(newNode);
+
+        //push edges from the parent node to each current
+        //child we just created
+        let newEdge = {
+          id: node.ID.toString() + child.ID.toString(),
+          source: node.ID.toString(),
+          target: child.ID.toString(),
+          size: Math.random(),
+          color: '#ccc'
+        }
+        console.log(newEdge);
+        this.OutEdges.push(newEdge);
+        this.internalvisit(child);
+
+      }
+
+    }
+  }
+
+
+}
+
+
+
 function main() {
     console.log("starting");
     
@@ -22,17 +88,8 @@ var lexer = new Lexer.Lexer("x=100; ");
     var tree = parser.parse();
     console.log(tree);
     
-    let nodes = [tree];
-    let edges = [];
-
-    // we need to create a walker or visitor interface 
-    // that works on any AST node type and runs some method
-    // on each of its children...we also want to collect edges 
-    // somehow
-
-    //another alternatie is to create a children property on the base AST class
-    // and have other types override this with their own children so there
-    // is a common interface....
+  var treewWalker = new TreeWalker(tree);
+  var sigmaData = treewWalker.ComputeSigmaNodes();
 
 
     var i,
@@ -40,29 +97,10 @@ var lexer = new Lexer.Lexer("x=100; ");
     N = 100,
     E = 500,
     g = {
-      nodes: [],
-      edges: []
+      nodes:sigmaData.nodes,
+      edges: sigmaData.edges
     };
 
-
-// Generate a random graph:
-for (i = 0; i < N; i++)
-  g.nodes.push({
-    id: 'n' + i,
-    label: 'Node ' + i,
-    x: Math.random(),
-    y: Math.random(),
-    size: 6,
-    color: '#666'
-  });
-for (i = 0; i < E; i++)
-  g.edges.push({
-    id: 'e' + i,
-    source: 'n' + (Math.random() * N | 0),
-    target: 'n' + (Math.random() * N | 0),
-    size: Math.random(),
-    color: '#ccc'
-  });
 // Instantiate sigma:
 s = new sigma(
     {

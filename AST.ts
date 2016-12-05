@@ -1,20 +1,26 @@
 
 import * as Lexer from './Lexer';
+import * as GUID from './Guid';
+
 
 export class AST {
-    constructor() {
+    parent:AST
+    children :AST[];
+    ID:GUID.GUID;
 
+
+    constructor() {
+    this.parent = null;
+    this.children = [];
+    this.ID = new GUID.GUID();
     }
 }
 
 export class Compound extends AST{
    
-   children :AST[];
-
    constructor()
    {
     super();
-    this.children = [];
    }
 }
 
@@ -31,6 +37,9 @@ export class Assign extends AST
         this.token = op;
         this.op = op;
         this.right = right
+        this.children = [this.left,this.right];
+        this.left.parent = this;
+        this.right.parent = this;
     }
 }
 
@@ -47,7 +56,10 @@ constructor(token:Lexer.Token){
 
 export class NoOp extends AST
 {
-
+ constructor()
+   {
+    super();
+   }
 }
     
 export class BinOp extends AST {
@@ -62,18 +74,24 @@ export class BinOp extends AST {
         this.op = op;
         this.token = op;
         this.right = right;
+        this.children = [this.left,this.right];
+         this.left.parent = this;
+        this.right.parent = this;
     }
 }
 
-export class UnaryOp{
+export class UnaryOp extends AST{
     token: Lexer.Token;
     op: Lexer.Token;
     expr:AST
     constructor(op: Lexer.Token,expr: AST)
-    {
+    {   
+        super();
         this.expr = expr;
         this.op = op;
         this.token = op;
+        this.children = [expr];
+        this.expr.parent = this;
     }
 }
 

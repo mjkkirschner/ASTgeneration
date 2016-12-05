@@ -200,9 +200,4 @@ empty():AST.AST{
     this.eat(Lexer.ID);
     return node;
  }
-// empty(){
- //  
- //   return new AST.NoOp()
-// }
-
 };
