@@ -7,12 +7,13 @@ export class AST {
     parent:AST
     children :AST[];
     ID:GUID.GUID;
-
+    token:Lexer.Token
 
     constructor() {
     this.parent = null;
     this.children = [];
     this.ID = new GUID.GUID();
+    this.token = null;
     }
 }
 

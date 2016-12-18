@@ -42,9 +42,10 @@ class TreeWalker {
 
     if (node.children) {
       for (let child of node.children) {
+        
         let newNode = {
           id: child.ID.toString(),
-          label: child.constructor['name'],
+          label: child.constructor['name'] +" "+ JSON.stringify(child.token),
           x: Math.random(),
           y: Math.random(),
           size: 6,
@@ -84,7 +85,7 @@ function main() {
 $(document).ready( ()=> 
 {
  console.log("inside ready func");
-var lexer = new Lexer.Lexer("x=100; ");
+var lexer = new Lexer.Lexer("x=100*(x+20); y = 200; z = x+y; ");
     console.log(lexer);
     console.log(Parser);
     var parser = new Parser.parseMachine(lexer);
@@ -97,11 +98,8 @@ var lexer = new Lexer.Lexer("x=100; ");
   var sigmaData = treewWalker.ComputeSigmaNodes();
 
 
-    var i,
-    s,
-    N = 100,
-    E = 500,
-    g = {
+   var s;
+    var g = {
       nodes:sigmaData.nodes,
       edges: sigmaData.edges
     };
@@ -113,7 +111,7 @@ s = new sigma(
   container: $('#graph-container').get(0)
     });
     s.startForceAtlas2({worker:false,barnesHutOptimize:false});
-    setTimeout(()=> {s.stopForceAtlas2()},1000);
+    setTimeout(()=> {s.stopForceAtlas2()},3000);
 }
 );
     //var result = interpreter.interpret();
