@@ -4,12 +4,14 @@
   "description": "",
   "main": "Main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "antlr4ts": "node ./node_modules/.bin/antlr4ts -visitor ./DesignScript.g4 -o ./antlrStuff -Xlog"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "0.0.0",
+    "@types/core-js": "^0.9.35",
+    "antlr4ts-cli": "^0.4.0-alpha.1",
     "chai": "^3.5.0",
     "mocha": "^3.1.2",
     "requirejs": "^2.3.2",
@@ -17,7 +19,9 @@
   },
   "dependencies": {
     "@types/jquery": "^2.0.34",
+    "@types/node": "^6.0.52",
     "@types/sigmajs": "^1.0.27",
+    "antlr4ts": "^0.4.0-alpha.1",
     "jquery": "^3.1.1"
   }
 }
